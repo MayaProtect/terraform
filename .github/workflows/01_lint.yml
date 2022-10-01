@@ -1,0 +1,14 @@
+name: Terraform Lint
+
+on: [push, pull_request]
+
+jobs:
+  delivery:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Lint
+        uses: actionshub/terraform-lint@main
+        
