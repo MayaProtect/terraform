@@ -1,45 +1,45 @@
 variable "ssh_key_path" {
-  type = string
+  type    = string
   default = "~/.ssh/id_rsa.pub"
 }
 
 variable "instance_master_node" {
   type = object({
-    name = string
-    instance_type = string
+    name               = string
+    instance_type      = string
     security_group_ids = list(string)
   })
   default = {
-      name = "master"
-      instance_type = "t2.micro"
-      security_group_ids = []
+    name               = "master"
+    instance_type      = "t2.micro"
+    security_group_ids = []
   }
 }
 
 variable "instances_node" {
   type = map(object({
-    name = string
-    instance_type = string
+    name               = string
+    instance_type      = string
     security_group_ids = list(string)
   }))
   default = {
     "node1" = {
-      name = "node1"
-      instance_type = "t2.micro"
+      name               = "node1"
+      instance_type      = "t2.micro"
       security_group_ids = []
     }
     "node2" = {
-      name = "node2"
-      instance_type = "t2.micro"
+      name               = "node2"
+      instance_type      = "t2.micro"
       security_group_ids = []
     }
   }
 }
 
 resource "aws_instance" "mp_tool_gateway" {
-  ami                    = "ami-096800910c1b781ba"
-  instance_type          = "t2.nano"
-  key_name               = aws_key_pair.deployer.key_name
+  ami           = "ami-096800910c1b781ba"
+  instance_type = "t2.nano"
+  key_name      = aws_key_pair.deployer.key_name
   credit_specification {
     cpu_credits = "standard"
   }
@@ -71,9 +71,9 @@ resource "aws_eip" "mp_tool_gateway_eip" {
 }
 
 resource "aws_instance" "mp_master" {
-  ami = "ami-096800910c1b781ba"
+  ami           = "ami-096800910c1b781ba"
   instance_type = var.instance_master_node.instance_type
-  key_name = aws_key_pair.deployer.key_name
+  key_name      = aws_key_pair.deployer.key_name
   credit_specification {
     cpu_credits = "standard"
   }
@@ -103,10 +103,10 @@ resource "aws_eip" "mp_master_eip" {
 }
 
 resource "aws_instance" "mp_nodes" {
-  for_each = var.instances_node
-  ami                    = "ami-096800910c1b781ba"
-  instance_type          = each.value.instance_type
-  key_name               = aws_key_pair.deployer.key_name
+  for_each      = var.instances_node
+  ami           = "ami-096800910c1b781ba"
+  instance_type = each.value.instance_type
+  key_name      = aws_key_pair.deployer.key_name
   credit_specification {
     cpu_credits = "standard"
   }
@@ -120,8 +120,8 @@ resource "aws_instance" "mp_nodes" {
 }
 
 resource "aws_network_interface" "mp_node_nic" {
-  for_each = var.instances_node
-  subnet_id   = aws_subnet.mp_subnet_public.id
+  for_each  = var.instances_node
+  subnet_id = aws_subnet.mp_subnet_public.id
   security_groups = [
     aws_security_group.mp_ssh_from_gateway.id,
     aws_security_group.mp_sg_kubernetes.id
