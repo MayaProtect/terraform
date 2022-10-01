@@ -8,11 +8,13 @@ variable "instance_master_node" {
     name               = string
     instance_type      = string
     security_group_ids = list(string)
+    disk_size          = number
   })
   default = {
     name               = "master"
     instance_type      = "t2.micro"
     security_group_ids = []
+    disk_size          = 50
   }
 }
 
@@ -21,17 +23,20 @@ variable "instances_node" {
     name               = string
     instance_type      = string
     security_group_ids = list(string)
+    disk_size          = number
   }))
   default = {
     "node1" = {
       name               = "node1"
       instance_type      = "t2.micro"
       security_group_ids = []
+      disk_size          = 50
     }
     "node2" = {
       name               = "node2"
       instance_type      = "t2.micro"
       security_group_ids = []
+      disk_size          = 50
     }
   }
 }
@@ -81,6 +86,9 @@ resource "aws_instance" "mp_master" {
     device_index         = 0
     network_interface_id = aws_network_interface.mp_master_nic.id
   }
+  root_block_device {
+    volume_size = var.instance_master_node.disk_size
+  }
 
   tags = {
     Name = "mp_master"
@@ -113,6 +121,9 @@ resource "aws_instance" "mp_nodes" {
   network_interface {
     device_index         = 0
     network_interface_id = aws_network_interface.mp_node_nic[each.key].id
+  }
+  root_block_device {
+    volume_size = each.value.disk_size
   }
   tags = {
     Name = each.value.name
