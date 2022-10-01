@@ -1,0 +1,14 @@
+name: Check conventional commits
+
+on: [push]
+
+jobs:
+  check_commit:
+    name: Check commit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        name: Checkout
+      - uses: webiny/action-conventional-commits@v1.0.5
+        name: Check angular conventions
+        
