@@ -13,3 +13,7 @@ output "ip_public_front" {
 output "ip_public_ssh_gateway" {
   value = aws_eip.mp_tool_gateway_eip.public_ip
 }
+
+output "efs_dns" {
+  value = aws_efs_mount_target.mp_efs_mount_target.dns_name
+}
