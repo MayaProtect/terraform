@@ -15,6 +15,7 @@ resource "aws_vpc_dhcp_options_association" "mp_dhcp_options_association" {
 resource "aws_subnet" "mp_subnet_public" {
   vpc_id     = aws_vpc.mp_vpc.id
   cidr_block = "10.0.0.0/20"
+  map_public_ip_on_launch = true
 }
 
 resource "aws_subnet" "mp_subnet_private" {
