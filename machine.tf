@@ -3,6 +3,21 @@ variable "ssh_key_path" {
   default = "~/.ssh/id_rsa.pub"
 }
 
+variable "gateway" {
+  type    = object({
+    disk_size = number
+    instance_type = string
+    name          = string
+    cpu_credits   = string
+  })
+  default = {
+    disk_size = 8
+    instance_type = "t2.nano"
+    name          = "mp-tool-gateway"
+    cpu_credits   = "standard"
+  }
+}
+
 variable "instance_master_node" {
   type = object({
     name               = string
@@ -43,17 +58,20 @@ variable "instances_node" {
 
 resource "aws_instance" "mp_tool_gateway" {
   ami           = "ami-096800910c1b781ba"
-  instance_type = "t2.nano"
+  instance_type = var.gateway.instance_type
   key_name      = aws_key_pair.deployer.key_name
   credit_specification {
-    cpu_credits = "standard"
+    cpu_credits = var.gateway.cpu_credits
   }
   network_interface {
     device_index         = 0
     network_interface_id = aws_network_interface.mp_tool_gateway_nic.id
   }
+  root_block_device {
+    volume_size = var.gateway.disk_size
+  }
   tags = {
-    Name = "mp_ssh_gateway"
+    Name = var.gateway.name
   }
 }
 
@@ -135,7 +153,8 @@ resource "aws_network_interface" "mp_node_nic" {
   subnet_id = aws_subnet.mp_subnet_public.id
   security_groups = [
     aws_security_group.mp_ssh_from_gateway.id,
-    aws_security_group.mp_sg_kubernetes.id
+    aws_security_group.mp_sg_kubernetes.id,
+    aws_security_group.mp_web.id
   ]
   tags = {
     "Name" = "nic_${each.value.name}"
