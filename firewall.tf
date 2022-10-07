@@ -123,7 +123,18 @@ resource "aws_security_group" "mp_sg_kubernetes" {
       prefix_list_ids  = []
       security_groups  = []
       self             = false
-    }
+    },
+    {
+      description      = "ICMP"
+      from_port        = -1
+      to_port          = -1
+      protocol         = "icmp"
+      cidr_blocks      = [aws_vpc.mp_vpc.cidr_block]
+      ipv6_cidr_blocks = []
+      prefix_list_ids  = []
+      security_groups  = []
+      self             = false
+    },
   ]
   egress {
     from_port   = 0
