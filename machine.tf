@@ -4,14 +4,14 @@ variable "ssh_key_path" {
 }
 
 variable "gateway" {
-  type    = object({
-    disk_size = number
+  type = object({
+    disk_size     = number
     instance_type = string
     name          = string
     cpu_credits   = string
   })
   default = {
-    disk_size = 8
+    disk_size     = 8
     instance_type = "t2.nano"
     name          = "mp-tool-gateway"
     cpu_credits   = "standard"
