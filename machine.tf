@@ -57,9 +57,9 @@ variable "instances_node" {
 }
 
 resource "aws_instance" "mp_tool_gateway" {
-  ami           = "ami-096800910c1b781ba"
-  instance_type = var.gateway.instance_type
-  key_name      = aws_key_pair.deployer.key_name
+  ami                  = "ami-096800910c1b781ba"
+  instance_type        = var.gateway.instance_type
+  key_name             = aws_key_pair.deployer.key_name
   iam_instance_profile = aws_iam_instance_profile.mp_gateway_role.name
   credit_specification {
     cpu_credits = var.gateway.cpu_credits
@@ -189,47 +189,47 @@ resource "aws_iam_role_policy_attachment" "mp_gateway_role" {
 resource "aws_iam_role" "mp_gateway_role" {
   name = "mp_gateway_role"
   assume_role_policy = jsonencode(
-{
-  "Version": "2012-10-17",
-  "Statement": [
     {
-      "Action": "sts:AssumeRole",
-      "Principal": {
-        "Service": "ec2.amazonaws.com"
-      },
-      "Effect": "Allow",
-      "Sid": ""
-    }
-  ]
-})
+      "Version" : "2012-10-17",
+      "Statement" : [
+        {
+          "Action" : "sts:AssumeRole",
+          "Principal" : {
+            "Service" : "ec2.amazonaws.com"
+          },
+          "Effect" : "Allow",
+          "Sid" : ""
+        }
+      ]
+  })
 }
 
 resource "aws_iam_role" "mp_nodes_role" {
   name = "mp_nodes_role"
   assume_role_policy = jsonencode(
-{
-  "Version": "2012-10-17",
-  "Statement": [
     {
-      "Action": "sts:AssumeRole",
-      "Principal": {
-        "Service": "ec2.amazonaws.com"
-      },
-      "Effect": "Allow",
-      "Sid": ""
-    }
-  ]
-})
-  
+      "Version" : "2012-10-17",
+      "Statement" : [
+        {
+          "Action" : "sts:AssumeRole",
+          "Principal" : {
+            "Service" : "ec2.amazonaws.com"
+          },
+          "Effect" : "Allow",
+          "Sid" : ""
+        }
+      ]
+  })
+
 }
 
 resource "aws_iam_policy" "mp_nodes_role_ecr_policy" {
-  name               = "mp_nodes_role"
+  name = "mp_nodes_role"
   policy = jsonencode({
-    Version: "2012-10-17",
-    Statement: [
+    Version : "2012-10-17",
+    Statement : [
       {
-        Action: [
+        Action : [
           "ecr:GetAuthorizationToken",
           "ecr:BatchCheckLayerAvailability",
           "ecr:GetDownloadUrlForLayer",
@@ -238,19 +238,19 @@ resource "aws_iam_policy" "mp_nodes_role_ecr_policy" {
           "ecr:ListImages",
           "ecr:BatchGetImage"
         ],
-        Effect: "Allow",
-        Resource: "*"
+        Effect : "Allow",
+        Resource : "*"
       }
     ]
   })
 }
 resource "aws_iam_policy" "mp_gateway_role_ecr_policy" {
-  name               = "mp_gateway_role"
+  name = "mp_gateway_role"
   policy = jsonencode({
-    Version: "2012-10-17",
-    Statement: [
+    Version : "2012-10-17",
+    Statement : [
       {
-        Action: [
+        Action : [
           "ecr:GetAuthorizationToken",
           "ecr:BatchCheckLayerAvailability",
           "ecr:GetDownloadUrlForLayer",
@@ -260,8 +260,8 @@ resource "aws_iam_policy" "mp_gateway_role_ecr_policy" {
           "ecr:BatchGetImage",
           "ecr:DescribeImages",
         ],
-        Effect: "Allow",
-        Resource: "*"
+        Effect : "Allow",
+        Resource : "*"
       }
     ]
   })
