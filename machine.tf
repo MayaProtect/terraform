@@ -57,9 +57,10 @@ variable "instances_node" {
 }
 
 resource "aws_instance" "mp_tool_gateway" {
-  ami           = "ami-096800910c1b781ba"
-  instance_type = var.gateway.instance_type
-  key_name      = aws_key_pair.deployer.key_name
+  ami                  = "ami-096800910c1b781ba"
+  instance_type        = var.gateway.instance_type
+  key_name             = aws_key_pair.deployer.key_name
+  iam_instance_profile = aws_iam_instance_profile.mp_gateway_role.name
   credit_specification {
     cpu_credits = var.gateway.cpu_credits
   }
@@ -97,6 +98,8 @@ resource "aws_instance" "mp_master" {
   ami           = "ami-096800910c1b781ba"
   instance_type = var.instance_master_node.instance_type
   key_name      = aws_key_pair.deployer.key_name
+  # Add role to the instance
+  iam_instance_profile = aws_iam_instance_profile.mp_nodes_role.name
   credit_specification {
     cpu_credits = "standard"
   }
@@ -133,6 +136,8 @@ resource "aws_instance" "mp_nodes" {
   ami           = "ami-096800910c1b781ba"
   instance_type = each.value.instance_type
   key_name      = aws_key_pair.deployer.key_name
+  # Add role to the instance
+  iam_instance_profile = aws_iam_instance_profile.mp_nodes_role.name
   credit_specification {
     cpu_credits = "standard"
   }
@@ -159,4 +164,105 @@ resource "aws_network_interface" "mp_node_nic" {
   tags = {
     "Name" = "nic_${each.value.name}"
   }
+}
+
+resource "aws_iam_instance_profile" "mp_nodes_role" {
+  name = "mp_nodes_role"
+  role = aws_iam_role.mp_nodes_role.name
+}
+
+resource "aws_iam_instance_profile" "mp_gateway_role" {
+  name = "mp_gateway_role"
+  role = aws_iam_role.mp_gateway_role.name
+}
+
+resource "aws_iam_role_policy_attachment" "mp_nodes_role" {
+  role       = aws_iam_role.mp_nodes_role.name
+  policy_arn = aws_iam_policy.mp_nodes_role_ecr_policy.arn
+}
+
+resource "aws_iam_role_policy_attachment" "mp_gateway_role" {
+  role       = aws_iam_role.mp_gateway_role.name
+  policy_arn = aws_iam_policy.mp_gateway_role_ecr_policy.arn
+}
+
+resource "aws_iam_role" "mp_gateway_role" {
+  name = "mp_gateway_role"
+  assume_role_policy = jsonencode(
+    {
+      "Version" : "2012-10-17",
+      "Statement" : [
+        {
+          "Action" : "sts:AssumeRole",
+          "Principal" : {
+            "Service" : "ec2.amazonaws.com"
+          },
+          "Effect" : "Allow",
+          "Sid" : ""
+        }
+      ]
+  })
+}
+
+resource "aws_iam_role" "mp_nodes_role" {
+  name = "mp_nodes_role"
+  assume_role_policy = jsonencode(
+    {
+      "Version" : "2012-10-17",
+      "Statement" : [
+        {
+          "Action" : "sts:AssumeRole",
+          "Principal" : {
+            "Service" : "ec2.amazonaws.com"
+          },
+          "Effect" : "Allow",
+          "Sid" : ""
+        }
+      ]
+  })
+
+}
+
+resource "aws_iam_policy" "mp_nodes_role_ecr_policy" {
+  name = "mp_nodes_role"
+  policy = jsonencode({
+    Version : "2012-10-17",
+    Statement : [
+      {
+        Action : [
+          "ecr:GetAuthorizationToken",
+          "ecr:BatchCheckLayerAvailability",
+          "ecr:GetDownloadUrlForLayer",
+          "ecr:GetRepositoryPolicy",
+          "ecr:DescribeRepositories",
+          "ecr:ListImages",
+          "ecr:BatchGetImage"
+        ],
+        Effect : "Allow",
+        Resource : "*"
+      }
+    ]
+  })
+}
+resource "aws_iam_policy" "mp_gateway_role_ecr_policy" {
+  name = "mp_gateway_role"
+  policy = jsonencode({
+    Version : "2012-10-17",
+    Statement : [
+      {
+        Action : [
+          "ecr:GetAuthorizationToken",
+          "ecr:BatchCheckLayerAvailability",
+          "ecr:GetDownloadUrlForLayer",
+          "ecr:GetRepositoryPolicy",
+          "ecr:DescribeRepositories",
+          "ecr:ListImages",
+          "ecr:BatchGetImage",
+          "ecr:DescribeImages",
+        ],
+        Effect : "Allow",
+        Resource : "*"
+      }
+    ]
+  })
 }
